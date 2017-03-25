@@ -1,0 +1,26 @@
+<?php
+function createXml(){
+    $dir_path =  realpath('../public/abc/def');
+    $file_name = "abc.xml";
+    $xml = "";
+    $xml .= "<address>";
+    $xml .= "<name>custard-apple</name>";
+    $xml .= "<phone>9876543210</phone>";
+    $xml .= "</address>";
+    if (file_exists($dir_path."/".$file_name)) {
+          $dom->load($dir_path."/".$file_name);
+          $address = $dom->createDocumentFragment();
+          $address->appendXML($xml);
+          $dom->documentElement->appendChild($address);
+          //$dom->saveXML();
+          $dom->save($dir_path."/".$file_name);
+    } else {
+          $xmlobj=new SimpleXMLElement("<addresses>".$xml."</addresses  >");
+          $xmlString = $xmlobj->asXML();
+          $dom->preserveWhiteSpace = FALSE;
+          $dom->loadXML($xmlString);
+          $dom->save($dir_path."/".$file_name);
+    }
+    return  $dom;
+}
+?>
