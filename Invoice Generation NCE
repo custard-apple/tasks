@@ -1,0 +1,155 @@
+<?php
+// Void or cancel invoice by docutec NCE
+//echo PHP_INT_MAX;
+
+date_default_timezone_set('America/Guatemala');
+// $result = "";
+  echo "<pre>";
+// ABHAY:  NISHA, DONT REMOVE ANY SPACE IN FOLLOWING DATA
+ $content = '</ INICIO >
+</ DATOS CFD ********************************************************>
+No Autorizacion                  : 2525252016
+Fecha Autorizacion               : 2016-12-29
+Tipo Documento                   : NCE
+Estado Documento                 : ORIGINAL
+Serie                            : B1
+Rango Autorizado                 : 1               500
+Numero de Factura                : 1
+Fecha Emision                    : '.(new DateTime())->format("Y-m-d").'
+</ DATOS FISCALES EMISOR ********************************************>
+Razon social                     : GENBA, SOCIEDAD ANONIMA
+NIT                              : 93817290
+Pais                             : GT
+Municipio                        : GUATEMALA
+Lenguaje                         : ES
+Departamento                     : Guatemala
+Calle                            : AVENIDA MARISCAL 21-80 ZONA 11 GUATEMALA,GUATEMALA
+VENDEDOR                         : 1
+NOMBRE TIENDA                    : Store 1
+DIRECCION TIENDA                 : Zona 11
+MUNICIPIO TIENDA                 : Guatemala
+DEPARTAMENTO TIENDA              : Guatemala
+NUMERO DE SUCURSAL               : 1
+NOTA De NCE                      : Esta nota de crédito anula la factura FACE|161301636|FACE-63-B-001|170000000001 de la serie B1
+</ DATOS FISCALES RECEPTOR ******************************************>
+Razon Social                     : CONSUMIDOR FINAL
+NIT                              : CF
+Mail                             : ajittesting1@gmail.com
+Pais                             : Guatemala
+Municipio                        : Guatemala
+Lenguaje                         : ES
+Direccion                        : Ciudad
+Departamento                     : Guatemala
+Telefono                         : 7776040701
+CAMBIO                           : 0
+CONDICION DE PAGO                : C - Contado
+Personalizado 5                  :
+Personalizado 6                  :
+Personalizado 7                  :
+Personalizado 8                  :
+Personalizado 9                  :
+Personalizado 10                 :
+Personalizado 11                 :
+Personalizado 12                 :
+</ DETALLES *********************************************************>
+    CANT.             PREC_UNIT_SIN_IMPUESTO       PREC_UNIT_CON_IMPUESTO       TOTAL_SIN_IMPUESTO       TOTAL_CON_IMPUESTO       TIPO_DE_IMPUESTO       MONTO_DE_IMPUESTO       PORCENTAJE_DE_IMPUESTO       DESCUENTO               NOMBRE DEL ARTICULO
+   1                                11.9553                      13.39                    13.39                    13.39                      IVA                  1.43                          12.00          0.0000               Hogaza Artesanal
+
+   1                                19.1339                      21.43                    21.43                    21.43                      IVA                  2.3                           12.00          0.0000               Flatbread Blanco
+
+</ FIN DETALLE />
+</ TOTALES **********************************************************>
+EFECTIVO                         : 0
+TARJETA DE CREDITO               : 31.089285714286
+Otras                            : 0
+Total Descuentos                 : 0.00
+Total sin impuestos              : 31.09
+Total Impuestos                  : 3.73
+Valor Pagar                      : 34.82
+Moneda                           : QTZ
+</ IMPUESTOS ********************************************************>
+                    TIPO    PORCENTAJE         MONTO
+Impuesto1            IVA         12.00          3.7
+</ FIN DOCUMENTO>';
+
+       $soapUrl = "http://docutec.edxsolutions.com/WebService.xDoc/core.asmx";
+       $subsoapUrl = "http://tempuri.org/ConvertSignDocument";
+        $request = '<?xml version="1.0" encoding="utf-8"?>
+        <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+        <soap:Body>
+        <ConvertSignDocument xmlns="http://tempuri.org/">
+        	<Area>genbasa</Area>
+        	<Password>administrador</Password>
+        	<DocumentType>NCE</DocumentType>
+        	<DocumentContent><![CDATA['.$content.']]></DocumentContent>
+        </ConvertSignDocument>
+        </soap:Body>
+        </soap:Envelope>';
+
+        echo "Soap URL :".$soapUrl."<br/>";
+        echo "<b style='font-size:200%'>Request:</b><br/>". htmlentities($request) ."<br/><br/><br/>";
+
+          $headers = array(
+                       "Content-type: text/xml;charset=\"utf-8\"",
+                       "Accept: text/xml",
+                       "Cache-Control: no-cache",
+                       "Pragma: no-cache",
+                       "Content-length: ".strlen($request),
+                       "SOAPAction: ".$subsoapUrl
+                   ); //SOAPAction: your op URL
+
+           // PHP cURL  for https connection with auth
+           $ch = curl_init();
+           curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+           curl_setopt($ch, CURLOPT_URL, $soapUrl);
+           curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+           curl_setopt($ch, CURLOPT_USERPWD,true); // username and password - declared at the top of the doc
+           curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+           curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+           curl_setopt($ch, CURLOPT_POST, true);
+           curl_setopt($ch, CURLOPT_POSTFIELDS, $request); // the SOAP request
+           curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+            // converting
+            $response = curl_exec($ch);
+
+
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            echo "<b style='font-size:200%'>Result:</b><br/>";
+           echo "</br></br>------Original Response Code :------</br>\n\n\n\n";
+            print_r($response);exit;
+      		$resp_tmp = explode("<ConvertSignDocumentResult>",$response);
+      		$resp_tmp = explode("</ConvertSignDocumentResult>",$resp_tmp[1]);
+
+            //echo htmlspecialchars_decode($resp_tmp[0]);
+            //exit;
+            $main_xml = simplexml_load_string(htmlspecialchars_decode($resp_tmp[0]), 'SimpleXMLElement', LIBXML_NOCDATA | LIBXML_NOBLANKS);
+            /*$result = (array)$main_xml->Error->Description;
+            echo $result[0];exit;*/
+           // echo "\n\n</br></br>------My Code :------</br>\n\n\n\n";
+            if (!$main_xml->HasError) {
+                  $TextData = simplexml_load_string($main_xml->TextData);
+
+                  //var_dump($TextData->Documento->children('gs1', TRUE)->children());
+                  $invoice = $TextData->Documento->children('gs1', TRUE)->children();
+
+                  $DCAE = $TextData->Documento->CAE->DCAE;
+                  $FCAE = $TextData->Documento->CAE->FCAE->children('ds', TRUE);
+                  $dte = array();
+                  $dte['invoice'] = $invoice;
+                  $dte['cae']['dcae'] = $DCAE;
+                  $dte['cae']['fcae'] = $FCAE;
+            }
+            else{
+                  $result = (array)$main_xml->Error->Description;
+                  print_r($result);
+
+                  //$error_msg = $result[0];
+                  //echo $error_msg;
+                  exit;
+                  //echo trim($error_msg);
+            }
+            //echo $main_xml;exit;
+            //echo $main_xml->TextData;exit;
+
+            //echo "<pre>";print_r($dte);
