@@ -31,6 +31,14 @@ $di->set('config', function() {
 //Create and bind the DI to the application
 $app = new \Phalcon\Mvc\Micro($di);
 
+//set error handler
+set_error_handler("customError");
+
+function customError($errno, $errstr,$errfile,$errline) {
+  file_put_contents("logs/error.log", "\n"."Error:[$errno] $errstr $errfile $errline",FILE_APPEND);
+  //echo "<b>Error:</b> [$errno] $errstr";
+}
+
 $app->get('/user/sendMailToManager', function() use ($app){
       $response = new Response();
       try{
