@@ -39,6 +39,8 @@ function customError($errno, $errstr,$errfile,$errline) {
   //echo "<b>Error:</b> [$errno] $errstr";
 }
 
+//http://54.165.134.62/api/user/sendMailToManager/
+//http://genba.online/api/user/sendMailToManager/
 $app->get('/user/sendMailToManager', function() use ($app){
       $response = new Response();
       try{
