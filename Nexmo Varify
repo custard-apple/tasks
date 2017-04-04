@@ -1,0 +1,61 @@
+//*****************Nisha Nexmo Credentials********************//
+id : nishagulhane93@gmail.com
+pass : passport@1993
+key : 57056a52
+secret : ed8aa0400ecafeb9
+//*****************Nisha Nexmo Credentials********************//
+//define("API_KEY", "dc73586b");
+//define("API_SECRET", "52391ee93ada9993");
+define("API_KEY", "57056a52");
+define("API_SECRET", "ed8aa0400ecafeb9");
+//code for sending OTP through NEXMO
+$url = 'https://api.nexmo.com/verify/json?' . http_build_query([
+    'api_key' => API_KEY,
+    'api_secret' => API_SECRET,
+    'number' => $country_code . $phone,
+    'brand' => 'Custard-Apple'
+]);
+
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$result = curl_exec($ch);
+//echo "<pre>";
+//print_r($result);
+//exit();
+$decoded_response = (array)json_decode($result, true);
+
+/******************************************************************
+Request:-
+$url = 'https://api.nexmo.com/verify/json?' . http_build_query([
+    'api_key' => '57056a52',
+    'api_secret' => 'ed8aa0400ecafeb9',
+    'number' => '918446551347',
+    'brand' => 'NexmoVerifyTest'
+]);
+Response:-
+{"request_id":"4c2a62a6676d4da2995a0d9d299bed9c","status":"0"}
+*******************************************************************/
+
+//code for varifying OTP through NEXMO
+$url = 'https://api.nexmo.com/verify/check/json?' . http_build_query([
+    'api_key' => API_KEY,
+    'api_secret' => API_SECRET,
+    'request_id' => $request_id,
+    'code' => $otp
+]);
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$result = curl_exec($ch);
+$decoded_response = (array)json_decode($result, true);
+
+/*********************************************************************
+Request:-
+$url = 'https://api.nexmo.com/verify/check/json?' . http_build_query([
+    'api_key' => '57056a52',
+    'api_secret' => 'ed8aa0400ecafeb9',
+    'request_id' => '4c2a62a6676d4da2995a0d9d299bed9c',
+    'code' => '1782'
+]);
+Response:-
+{"request_id":"4c2a62a6676d4da2995a0d9d299bed9c","status":"0","event_id":"fa9ec41b38a870e5b5679224c09d0517","price":"0.03000000","currency":"EUR"}
+***********************************************************************/
