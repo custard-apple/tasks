@@ -1,0 +1,12 @@
+//App Deep Linking Code
+//If app available in device then open from device otherwise from play store
+// android
+if (preg_match('#android#i', $_SERVER ['HTTP_USER_AGENT'])) {
+    $open = 'intent://scan/#Intent;scheme=zxing;package=com.google.zxing.client.android;end';
+    header('Location: '.$open);
+}
+// ios
+if (preg_match('#(iPad|iPhone|iPod)#i', $_SERVER ['HTTP_USER_AGENT'])) {
+        header('Location: itms://itunes.apple.com/us/app/google-maps-real-time-navigation/id585027354?mt=8');
+        exit;
+}
