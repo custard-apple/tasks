@@ -90,3 +90,64 @@ $app->get('/user/sendMailToManager', function() use ($app){
       }
 
 });
+/************************list of  Operator orders Function************************/
+$app->get('/operator/order_list', function() use ($app) {
+      $start = microtime(true);
+      $response = new Response();
+      $ts = new DateTime();
+      $today = $ts->format('Y-m-d');
+      try{
+            $operator_id=$app->request->get('operator_id');
+            $operator_role=$app->request->get('operator_role');
+            if ($operator_id==0) {
+                  $response->setJsonContent(array('status' => false ,'message' => 'Operator id should not be zero'));
+            }
+            else{
+                  if ($operator_role == "delivery_man") {
+                        $order_list= Orders::find(array(
+                              "(order_delivery_man_id= :id: AND date_format(order_expected_time,'%Y-%m-%d') >= :today: AND order_status NOT IN ({order_status:array})) ",
+                              'bind' => array('id' => $operator_id,
+                                      'order_status' => array('Trashed','Canceled',''),
+                                      'today' => $today
+                              )
+
+                        ));
+                  }
+                  else if($operator_role == "store_manager"){
+                        $store_sql="SELECT s.id from Stores s where FIND_IN_SET('".$operator_id."',s.store_managers_id)";
+                        $product_sql = "SELECT p.id FROM Products p WHERE p.store_id IN (".$store_sql.")";
+                        $items_sql = "SELECT DISTINCT ot.store_order_id FROM OrderItems ot WHERE ot.product_id IN (".$product_sql.")";
+                        $order_sql = "SELECT * FROM Orders o WHERE o.id IN (".$items_sql.") AND DATE_FORMAT( o.order_expected_time,  '%Y-%m-%d' ) >= DATE_FORMAT( NOW( ) ,  '%Y-%m-%d' ) AND o.order_status NOT IN ('Trashed',  'Canceled')";
+                        $order_list = $this->modelsManager->executeQuery($order_sql);
+                  }
+                  if ( $order_list== false ) {
+                        $response->setJsonContent(array('status' => false, 'message' => "No order found for this operator"));
+                  }
+                  else{
+                         $order_data = array();
+                         $product_data = array();
+                         foreach ($order_list as $key => $value) {
+                               $order_data[$key]['order_id'] = $value->id;
+                               $get_addresses = getUserAddress($value->order_user_address_id);
+                               //$get_addresses= UserAddress::findFirstById($value->order_user_address_id);
+                               $order_data[$key]['order_user_address'] = $get_addresses;
+                               $product_list= OrderItems::find([
+                                      '(store_order_id= :store_order_id:)',
+                                      'bind' => array('store_order_id' => $value->id)
+                               ]);
+                               $order_data[$key]['order_status'] = $value->order_status;
+                               $order_data[$key]['order_expected_time'] = $value->order_expected_time;
+                               $order_data[$key]['order_placed_time'] = $value->order_placed_time;
+                               $order_data[$key]['order_delivered_time'] = $value->order_delivered_time;
+                         }//exit;
+                         $response->setJsonContent(array('status' => true, 'operator_order_list' => $order_data, 'count' => count($order_data)));
+                  }
+            }
+      }catch(Exception $e){
+            $response->setJsonContent(array('status' => 'error', 'message' => $e->getMessage()));
+      }
+      //$total_time =  round(microtime(true) - $start_time) ;
+      //echo ':'.round((microtime(true) - $start),3)."sec DT: ".date("D, d M y H:i:s O");
+      return $response;
+});
+/***********************End list of Operator orders Function*************************/
