@@ -1,0 +1,227 @@
+<?php
+use Phalcon\Mvc\User\Component;
+
+class GreenPay extends Component
+{
+      public $token;
+      public $loginUrl = "https://api.greenpay.me/login";
+      public $customerUrl = "https://api.greenpay.me/customers";
+      public $transactionUrl = "https://api.greenpay.me/transactions";
+      //*****************Sandbox credentials*******************//
+      /*public $loginUrl = "https://sandbox.greenpay.me/login";
+      public $customerUrl = "https://sandbox.greenpay.me/customers";
+      public $transactionUrl = "https://sandbox.greenpay.me/transactions";
+      $username = "smartcanvas";
+      $password = "smartcanvas11"*/
+      //*****************Sandbox credentials*******************//
+      public function __construct(){
+            $username = "genba";
+            $password = "W4qilqEjx5ur";
+            $data = $this->login($username, $password, $this->loginUrl);
+            $response = json_decode($data, TRUE);
+            $this->token = $response['token_type'] . ' ' . $response['access_token'];
+      }
+
+/*****************************User Login APIs**************************************/
+      public function login($user,$pass, $url){
+            $data = array("username" => $user, "password" =>$pass);
+            $data_string = json_encode($data);
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                      'Content-Type: application/json',
+                      'Content-Length: ' . strlen($data_string)
+                 )
+            );
+            $response = curl_exec($ch);
+            return $response;
+      }
+/*****************************End User Login APIs**************************************/
+/*****************************Customer APIs*********************************/
+      public function getAllCustomer(){
+            //$url = "http://sandbox.greenpay.me/customers";
+            $ch = curl_init($this->customerUrl);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                      'Content-Type: application/json',
+                      'authorization: ' . $this->token
+                 )
+            );
+            $response = curl_exec($ch);
+            return $response;
+      }
+      public function createCustomer($user){
+            $user = json_encode($user);
+            $ch = curl_init($this->customerUrl);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $user);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                      'Content-Type: application/json',
+                      'authorization: ' . $this->token
+                 )
+            );
+            $response = curl_exec($ch);
+            return $response;
+      }
+      public function deleteCustomer($user_id){
+            $url = $this->customerUrl ."/". $user_id;
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                      'Content-Type: application/json',
+                      'authorization: ' . $this->token
+                 )
+            );
+            $response = curl_exec($ch);
+            return $response;
+      }
+      public function getCustomer($user_id){
+            $url = $this->customerUrl ."/". $user_id;
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                      'Content-Type: application/json',
+                      'authorization: ' . $this->token
+                 )
+            );
+            $response = curl_exec($ch);
+            return $response;
+      }
+      public function updateCustomer($user_id, $user){
+            $url = $this->customerUrl ."/". $user_id;
+            $user = json_encode($user);
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $user);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                      'Content-Type: application/json',
+                      'authorization: ' . $this->token
+                 )
+            );
+            $response = curl_exec($ch);
+            return $response;
+      }
+/*****************************End Customer APIs*********************************/
+/*****************************Credit Card APIs************************************/
+      public function getAllCreditCard($user_id){
+            $url = $this->customerUrl ."/". $user_id ."/creditCards" ;
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                      'Content-Type: application/json',
+                      'authorization: ' . $this->token
+                 )
+            );
+            $response = curl_exec($ch);
+            return $response;
+      }
+       public function createCreditCard($user_id, $card){
+            $url = $this->customerUrl ."/". $user_id ."/creditCards" ;
+            $card = json_encode($card);
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $card);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                      'Content-Type: application/json',
+                      'authorization: ' . $this->token
+                 )
+            );
+            $response = curl_exec($ch);
+            //echo "<pre>";print_r($response);exit;
+            return $response;
+      }
+      public function deleteCreditCard($user_id, $card_id){
+            $url = $this->customerUrl ."/". $user_id ."/creditCards" ."/". $card_id;
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                      'Content-Type: application/json',
+                      'authorization: ' . $this->token
+                 )
+            );
+            $response = curl_exec($ch);
+            return $response;
+      }
+      public function getCreditCard($user_id, $card_id){
+            $url = $this->customerUrl ."/". $user_id ."/creditCards" ."/". $card_id;
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                      'Content-Type: application/json',
+                      'authorization: ' . $this->token
+                 )
+            );
+            $response = curl_exec($ch);
+            return $response;
+      }
+      public function updateCreditCard($user_id, $card_id, $card){
+            $url = $this->customerUrl ."/". $user_id ."/creditCards" ."/". $card_id;
+            $card = json_encode($card);
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $card);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                      'Content-Type: application/json',
+                      'authorization: ' . $this->token
+                 )
+            );
+            $response = curl_exec($ch);
+            return $response;
+      }
+/*****************************End Credit Card APIs*********************************/
+/*****************************Trsanction APIs**************************************/
+      public function getAllTransaction(){
+            $ch = curl_init($this->transactionUrl);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                      'Content-Type: application/json',
+                      'authorization: ' . $this->token
+                 )
+            );
+            $response = curl_exec($ch);
+            return $response;
+      }
+       public function createTransaction($transaction){
+            $transaction = json_encode($transaction);
+            $ch = curl_init($this->transactionUrl);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $transaction);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                      'Content-Type: application/json',
+                      'authorization: ' . $this->token
+                 )
+            );
+            $response = curl_exec($ch);
+            return $response;
+      }
+      public function getTransaction($transaction_id){
+            $url = $this->transactionUrl ."/". $transaction_id;
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                      'Content-Type: application/json',
+                      'authorization: ' . $this->token
+                 )
+            );
+            $response = curl_exec($ch);
+            return $response;
+      }
+
+/*****************************End Trsanction APIs**********************************/
+}//end class
+?>
