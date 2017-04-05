@@ -1,0 +1,10 @@
+//getting each row data for product from table using jquery
+var table = $(".product_list tbody");
+table.find('tr').each(function (i, el) {
+       var product = {};
+       var tds = $(this).find('select');
+       var option = $(tds).find('option:selected');
+       product.id = option.val();
+       product.name = option.text();
+       products.push(product);
+});
