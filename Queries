@@ -1,0 +1,10 @@
+CREATE TABLE `translations` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `language` VARCHAR(5) NOT NULL COLLATE 'utf8_bin',
+    `key_name` VARCHAR(48) NOT NULL COLLATE 'utf8_bin',
+    `value` TEXT NOT NULL COLLATE 'utf8_bin',
+    PRIMARY KEY (`id`)
+)
+Optional create unique index
+
+CREATE UNIQUE INDEX translations_language_key_name_unique_index ON translations (language, key_name);
